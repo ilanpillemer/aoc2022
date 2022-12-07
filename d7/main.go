@@ -59,7 +59,6 @@ func part2(xs []int) int {
 	//
 	//level := 30000000 - (70000000 - 48381165)
 	level := 30000000 - (70000000 - 48748071)
-	_ = level
 	options := []int{}
 	for _, x := range xs {
 		if x >= level {
