@@ -26,12 +26,12 @@ func main() {
 		process(line)
 	}
 	fmt.Printf("There are %d cycles\n", cycle)
-	fmt.Println("p1 :", solve1(store))
-	solve2()
-
+	fmt.Println("p1 :", solve(store))
+	fmt.Println("p2")
+	render()
 }
 
-func solve1(reg map[int]int) int {
+func solve(reg map[int]int) int {
 	sum := (20 * reg[20]) +
 		(60 * reg[60]) +
 		(100 * reg[100]) +
@@ -41,7 +41,7 @@ func solve1(reg map[int]int) int {
 	return sum
 }
 
-func solve2() {
+func render() {
 	for i := 0; i < 240; i++ {
 		if newline(i) {
 			fmt.Println(" ", offset)
@@ -77,7 +77,6 @@ func process(line string) {
 	var instr string
 	var par int
 	fmt.Sscanf(line, "%s %d", &instr, &par)
-
 	switch instr {
 	case "noop":
 		store[cycle] = x
