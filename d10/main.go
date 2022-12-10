@@ -11,7 +11,7 @@ var x = 1
 var y = 0
 var cycle = 1
 var offset = 0
-var part1 = map[int]int{}
+var store = map[int]int{}
 
 func main() {
 	fmt.Println("d10")
@@ -26,7 +26,7 @@ func main() {
 		process(line)
 	}
 	fmt.Printf("There are %d cycles\n", cycle)
-	fmt.Println("p1 :", solve1(part1))
+	fmt.Println("p1 :", solve1(store))
 	solve2()
 
 }
@@ -56,7 +56,7 @@ func solve2() {
 }
 
 func pixel(x int) bool {
-	mid := part1[x+1]
+	mid := store[x+1]
 	x = x - offset
 	if x == mid-1 || x == mid || x == mid+1 {
 		return true
@@ -80,19 +80,14 @@ func process(line string) {
 
 	switch instr {
 	case "noop":
-		part1[cycle] = x
+		store[cycle] = x
 		cycle++
-
 	case "addx":
-		part1[cycle] = x
-
+		store[cycle] = x
 		cycle++
-		part1[cycle] = x
-
+		store[cycle] = x
 		cycle++
 		x = x + par
-		part1[cycle] = x
-
+		store[cycle] = x
 	}
-
 }
