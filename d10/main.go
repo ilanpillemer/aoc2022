@@ -23,7 +23,6 @@ func main() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		//fmt.Println(line)
 		process(line)
 	}
 	fmt.Printf("There are %d cycles\n", cycle)
@@ -81,21 +80,17 @@ func process(line string) {
 
 	switch instr {
 	case "noop":
-		//fmt.Printf("cycle %d: x = %d\n", cycle, x)
 		part1[cycle] = x
 		cycle++
 
 	case "addx":
-		//fmt.Printf("cycle %d: x = %d\n", cycle, x)
 		part1[cycle] = x
 
 		cycle++
-		//fmt.Printf("cycle %d: x = %d\n", cycle, x)
 		part1[cycle] = x
 
 		cycle++
 		x = x + par
-		//fmt.Printf("cycle %d: x = %d\n", cycle, x)
 		part1[cycle] = x
 
 	}
