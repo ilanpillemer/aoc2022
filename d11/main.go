@@ -111,7 +111,7 @@ func main() {
 		display(monkeys)
 		fmt.Println()
 	}
-	fmt.Println("solve:", play(monkeys))
+	fmt.Println("Your puzzle answer was:", play(monkeys))
 }
 
 func play(xs map[int]Monkey) int {
