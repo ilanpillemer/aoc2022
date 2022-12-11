@@ -22,6 +22,7 @@ type Monkey struct {
 
 var monkeys = map[int]Monkey{}
 var count int
+var reducer int64 = 1
 
 func main() {
 	fmt.Println("d11")
@@ -83,6 +84,7 @@ func main() {
 					rhs = trim(rhs)
 					fmt.Sscanf(rhs, "divisible by %d", &d)
 					m.div = d
+					reducer = reducer * int64(d)
 
 				case strings.HasPrefix(line, "If true"):
 					var d int
@@ -102,16 +104,16 @@ func main() {
 	}
 	fmt.Printf("%d %v\n", count, monkeys)
 	display(monkeys)
-	for i := 1; i < 20+1; i++ {
+	for i := 1; i < 10000+1; i++ {
 		fmt.Printf("After round %d, the monkeys are holding items with these worry levels:\n", i)
 		round(monkeys)
 		display(monkeys)
 		fmt.Println()
 	}
-	fmt.Println("part1", part1(monkeys))
+	fmt.Println("solve:", play(monkeys))
 }
 
-func part1(xs map[int]Monkey) int {
+func play(xs map[int]Monkey) int {
 	total := 0
 	list := []int{}
 	for k := 0; k < count; k++ {
@@ -134,8 +136,9 @@ func round(xs map[int]Monkey) {
 			//fmt.Printf("  Monkey inspects an item with a worry level of %d.\n", item)
 			item := m.fn(item)
 			//fmt.Printf("    Worry level becomes %d.\n", item)
-			item = item / 3
+			//item = item / 3
 			//fmt.Printf("    Boredom makes worry level %d.\n", item)
+			item = item % reducer
 			if item%int64(m.div) == 0 {
 				//fmt.Printf("    Current worry level is divisible by %d.\n", m.div)
 				nextm := xs[m.iftrue]
@@ -171,6 +174,7 @@ func trim(x string) string {
 func display(xs map[int]Monkey) {
 	for k := 0; k < count; k++ {
 		m := monkeys[k]
-		fmt.Printf("Monkey %d: %v  [inspections: %d]\n", m.id, m.items, m.inspections)
+		//fmt.Printf("Monkey %d: %v  [inspections: %d]\n", m.id, m.items, m.inspections)
+		fmt.Printf("Monkey %d inspected items %d times.\n", m.id, m.inspections)
 	}
 }
