@@ -12,8 +12,8 @@ import (
 
 type Monkey struct {
 	id          int
-	items       []int
-	fn          func(old int) int
+	items       []int64
+	fn          func(old int64) int64
 	div         int
 	iftrue      int
 	iffalse     int
@@ -38,7 +38,7 @@ func main() {
 			var i int
 			fmt.Sscanf(line, "Monkey %d:", &i)
 			m := Monkey{}
-			m.items = []int{}
+			m.items = []int64{}
 			m.id = i
 			for scanner.Scan() {
 				monkeys[i] = m
@@ -65,16 +65,16 @@ func main() {
 					switch op {
 					case "+":
 						if rhs == "old" {
-							m.fn = func(old int) int { return old + old }
+							m.fn = func(old int64) int64 { return old + old }
 							continue
 						}
-						m.fn = func(old int) int { return old + atoi(rhs) }
+						m.fn = func(old int64) int64 { return old + atoi(rhs) }
 					case "*":
 						if rhs == "old" {
-							m.fn = func(old int) int { return old * old }
+							m.fn = func(old int64) int64 { return old * old }
 							continue
 						}
-						m.fn = func(old int) int { return old * atoi(rhs) }
+						m.fn = func(old int64) int64 { return old * atoi(rhs) }
 					default:
 						panic(op)
 					}
@@ -128,36 +128,36 @@ func part1(xs map[int]Monkey) int {
 func round(xs map[int]Monkey) {
 	for k := 0; k < count; k++ {
 		m := xs[k]
-		fmt.Printf("Monkey :%d\n", k)
+		//fmt.Printf("Monkey :%d\n", k)
 		for _, item := range m.items {
 			m.inspections++
-			fmt.Printf("  Monkey inspects an item with a worry level of %d.\n", item)
+			//fmt.Printf("  Monkey inspects an item with a worry level of %d.\n", item)
 			item := m.fn(item)
-			fmt.Printf("    Worry level becomes %d.\n", item)
+			//fmt.Printf("    Worry level becomes %d.\n", item)
 			item = item / 3
-			fmt.Printf("    Boredom makes worry level %d.\n", item)
-			if item%m.div == 0 {
-				fmt.Printf("    Current worry level is divisible by %d.\n", m.div)
+			//fmt.Printf("    Boredom makes worry level %d.\n", item)
+			if item%int64(m.div) == 0 {
+				//fmt.Printf("    Current worry level is divisible by %d.\n", m.div)
 				nextm := xs[m.iftrue]
 				nextm.items = append(nextm.items, item)
 				xs[m.iftrue] = nextm
-				fmt.Printf("    Item with worry level %d is thrown to monkey %d.\n", item, m.iftrue)
+				//fmt.Printf("    Item with worry level %d is thrown to monkey %d.\n", item, m.iftrue)
 			} else {
-				fmt.Printf("    Current worry level is not divisible by %d.\n", m.div)
+				//fmt.Printf("    Current worry level is not divisible by %d.\n", m.div)
 				nextm := xs[m.iffalse]
 				nextm.items = append(nextm.items, item)
 				xs[m.iffalse] = nextm
-				fmt.Printf("    Item with worry level %d is thrown to monkey %d.\n", item, m.iffalse)
+				//fmt.Printf("    Item with worry level %d is thrown to monkey %d.\n", item, m.iffalse)
 			}
 		}
-		m.items = []int{}
+		m.items = []int64{}
 		xs[k] = m
 	}
 }
 
-func atoi(x string) int {
+func atoi(x string) int64 {
 	x = strings.TrimSpace(x)
-	i, err := strconv.Atoi(x)
+	i, err := strconv.ParseInt(x, 10, 64)
 	if err != nil {
 		panic(err)
 	}
