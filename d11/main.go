@@ -105,7 +105,8 @@ func main() {
 	fmt.Printf("%d %v\n", count, monkeys)
 	display(monkeys)
 	for i := 1; i < 10000+1; i++ {
-		fmt.Printf("After round %d, the monkeys are holding items with these worry levels:\n", i)
+		//fmt.Printf("After round %d, the monkeys are holding items with these worry levels:\n", i)
+		fmt.Printf("== After round %d ==\n", i)
 		round(monkeys)
 		display(monkeys)
 		fmt.Println()
