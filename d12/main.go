@@ -15,6 +15,7 @@ var S acc
 var E Point
 var XS = []acc{}
 var seen = map[Point]bool{}
+var limit = 394
 
 func main() {
 	fmt.Println("d12")
@@ -38,20 +39,24 @@ func main() {
 	fmt.Printf("part 2 has %d choices\n", len(XS))
 	fmt.Println(E)
 	//display(grid)
-	//	steps := solve(grid)
-	//fmt.Println("steps: ", steps)
+	steps := solve(grid)
+	fmt.Println("Part1 steps: ", steps)
 
 	scores := []int{}
-	for _, next := range XS {
+	fmt.Println("calculating part 2")
+	for i, next := range XS {
+		fmt.Print(".")
 		seen = map[Point]bool{}
-		fmt.Println("solving for ", next)
 		S = next
 		seen[S.x] = true
 		steps := solve(grid)
 		scores = append(scores, steps)
-		fmt.Println("steps: ", steps)
-		//display(grid)
+		if i%100 == 0 {
+			fmt.Println()
+		}
+
 	}
+	fmt.Println()
 	sort.Ints(scores)
 	fmt.Printf("Most scenic score %d\n", scores[0])
 }
@@ -68,6 +73,9 @@ func solve(xs map[Point]rune) int {
 			break
 		}
 		queue = append(queue, getMoves(S)...)
+		if len(queue) == 0 {
+			return maxx * maxy
+		}
 		S = queue[0]
 		queue = queue[1:]
 
@@ -82,6 +90,9 @@ func getMoves(e acc) []acc {
 	down := e.x.Add(Pt(0, -1))
 	left := e.x.Add(Pt(-1, 0))
 	right := e.x.Add(Pt(1, 0))
+	if e.c > limit {
+		return moves
+	}
 	if valid(e.x, up) {
 		moves = append(moves, acc{up, e.c + 1})
 		seen[up] = true
