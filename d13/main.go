@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	str := string(file) // convert content to a 'string'
+	str := string(file)
 	//  part 1
 	//  fmt.Println(str)
 	//  pairs := strings.Split(str, "\n\n")
