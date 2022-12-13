@@ -48,15 +48,14 @@ func trim(str string) string {
 
 // override base functions in Julia and then run the generated Julia Code
 
-//julia> function Base.isless(x::Int64, y::Vector{Int64})
-//       return [x] < y
-//       end
+//function Base.isless(x::Int64, y::Vector{Int64})
+// return [x] < y
+// end
 //
+//function Base.isless(x::Vector{Int64}, y::Int64)
+// return x < [y]
+//end
 //
-//       function Base.isless(x::Vector{Int64}, y::Int64)
-//       return x < [y]
-//       end
-
 //function Base.isless(x::Int64, y::Vector{Any})
 // return [x] < y
 //end
