@@ -50,7 +50,7 @@ func trim(str string) string {
 
 //function Base.isless(x::Int64, y::Vector{Int64})
 // return [x] < y
-// end
+//end
 //
 //function Base.isless(x::Vector{Int64}, y::Int64)
 // return x < [y]
