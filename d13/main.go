@@ -15,9 +15,10 @@ func main() {
 		log.Fatal(err)
 	}
 	str := string(file) // convert content to a 'string'
-	//fmt.Println(str)
-	//	pairs := strings.Split(str, "\n\n")
-	//fmt.Println(pairs)
+	//  part 1
+	//  fmt.Println(str)
+	//  pairs := strings.Split(str, "\n\n")
+	//  fmt.Println(pairs)
 	//	fmt.Println("total=0")
 	//	for i, x := range pairs {
 	//		ys := strings.Fields(x)
