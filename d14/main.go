@@ -34,46 +34,60 @@ func main() {
 	display(grid)
 	fmt.Println()
 	i := 0
+
+	// part 2
+
 	for {
 		i++
 		flow := pour(grid, entry)
 		fmt.Printf("after %d units of sand..\n", i)
-		display(grid)
+		//display(grid)
 		fmt.Println()
+		//		if !flow {
+		//			fmt.Println("solution to part 1:", i-1)
+		//			break
+		//		}
+
 		if !flow {
-			fmt.Println("solution to part 1:", i-1)
+			fmt.Println("solution to part 2:", i)
+			display(grid)
 			break
 		}
-
 	}
 }
 
 func pour(xs map[Point]string, pt Point) bool {
-	if pt.X < minx || pt.X > maxx || pt.Y > maxy{
-		return false
+
+	// part 1
+	if pt.X < minx || pt.X > maxx || pt.Y > maxy {
+		//	return false
 	}
-	fmt.Println("trying ", pt)
+
+	//fmt.Println("trying ", pt)
 	down := pt.Add(Pt(0, 1))
 	left := pt.Add(Pt(-1, 1))
 	right := pt.Add(Pt(1, 1))
 
 	switch {
-	case grid[down] == "":
+	case grid[down] == "" && pt.Y < maxy+1:
 		return pour(xs, down)
-	case grid[left] == "":
+	case grid[left] == "" && pt.Y < maxy+1:
 		return pour(xs, left)
-	case grid[right] == "":
+	case grid[right] == "" && pt.Y < maxy+1:
 		return pour(xs, right)
 	default:
 		grid[pt] = "o"
+		if pt == entry {
+			return false
+		}
 		return true
 	}
 
 }
 
 func display(xs map[Point]string) {
-	for y := 0; y < maxy+1; y++ {
-		for x := minx; x < maxx+1; x++ {
+	for y := 0; y < maxy+3; y++ {
+		for x := minx - 20; x < maxx+1+20; x++ {
 			tile := xs[Pt(x, y)]
 			if tile == "" {
 				tile = "."
