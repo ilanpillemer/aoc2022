@@ -127,31 +127,24 @@ func scanBorders(xs map[Point]string) {
 
 func getBorders() map[Point]bool {
 	borders := map[Point]bool{}
+	add := func(xs map[Point]bool, pt Point) {
+		if pt.X >= 0 && pt.X < limit && pt.Y >= 0 && pt.Y < limit {
+			borders[pt] = true
+		}
+	}
 	for i, sensor := range sensors {
 		fmt.Printf("sensor %d -> %v\n", i, sensor)
 
 		dist := sensor.radius() + 1
 		for x := 0; x <= dist; x++ {
-			//			fmt.Printf("x: %d, y:%d\n", x, dist-x)
-			//			fmt.Printf("x: %d, y:%d\n", x, -(dist - x))
-			//			fmt.Printf("x: %d, y:%d\n", -x, dist-x)
-			//			fmt.Printf("x: %d, y:%d\n", x, -(dist - x))
 			a := sensor.S.Add(Pt(x, dist-x))
 			b := sensor.S.Add(Pt(x, -(dist - x)))
 			c := sensor.S.Add(Pt(-x, dist-x))
 			d := sensor.S.Add(Pt(-x, -(dist - x)))
-			if a.X >= 0 && a.X < limit && a.Y >= 0 && a.Y < limit {
-				borders[a] = true
-			}
-			if b.X >= 0 && b.X < limit && b.Y >= 0 && b.Y < limit {
-				borders[b] = true
-			}
-			if c.X >= 0 && c.X < limit && c.Y >= 0 && c.Y < limit {
-				borders[c] = true
-			}
-			if d.X >= 0 && d.X < limit && d.Y >= 0 && d.Y < limit {
-				borders[d] = true
-			}
+			add(borders,a)
+			add(borders,b)
+			add(borders,c)
+			add(borders,d)
 		}
 	}
 	return borders
