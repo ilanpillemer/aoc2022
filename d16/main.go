@@ -54,20 +54,21 @@ func main() {
 	//		fmt.Printf("%s -> %v\n", k, v)
 	//	}
 
-	fmt.Println("simplify")
-	gra := makeGraph(xs)
+	//	fmt.Println("simplify")
+	//	gra := makeGraph(xs)
+	//
+	//	for i, g := range gra {
+	//		fmt.Println(i, g)
+	//	}
 
-	for i, g := range gra {
-		fmt.Println(i, g)
-	}
-	dist := floydWarshall(gra)
+	//dist := floydWarshall(gra)
 	//dist[][] will be the output matrix that will finally
 	//have the shortest distances between every pair of vertices
 	fmt.Println()
-	fmt.Println("final distances\n")
-	for _, d := range dist {
-		fmt.Printf("%4g\n", d)
-	}
+	//	fmt.Println("final distances\n")
+	//	for _, d := range dist {
+	//		fmt.Printf("%4g\n", d)
+	//	}
 
 	// test proposed answer - to get a suitable scoring algo
 
@@ -81,8 +82,10 @@ func main() {
 	//pathOptions := maps.Keys(pathI)
 
 	best = solve("AA", map[string]bool{}, 30)
-
-	fmt.Println("winning score is:", best)
+	//	fmt.Println("winning score is:", best)
+	best2 := solve2("AA", map[string]bool{}, 26, 1)
+	fmt.Println("winning score part 1 is:", best)
+	fmt.Println("winning score part 2 is:", best2)
 }
 
 var best = 0
@@ -105,7 +108,6 @@ func solve(N string, V map[string]bool, time int) int {
 	}
 	ans := 0
 	//if I am not open, open me.
-	//to be replaced with distance matrix if this works later
 	if xs[N].rate > 0 && !V[N] {
 		newV := maps.Clone(V)
 		newV[N] = true
@@ -117,6 +119,38 @@ func solve(N string, V map[string]bool, time int) int {
 	}
 
 	memo[key] = ans
+	return ans
+}
+
+var memo2 = map[string]int{}
+
+func solve2(N string, V map[string]bool, time int, player int) int {
+	if time == 0 && player == 0 {
+		return 0
+	}
+
+	if time == 0 && player == 1 {
+		return solve2("AA", V, 26, 0)
+	}
+	// if I am at node [N] and I have opened [V] valves. and I have [T] time
+	// left and I am player X What can I score fromt this position?
+	key := fmt.Sprintf("%v%v%v%v", N, V, time, player)
+	if i, ok := memo2[key]; ok {
+		return i
+	}
+	ans := 0
+	//if I am not open, open me.
+	if xs[N].rate > 0 && !V[N] {
+		newV := maps.Clone(V)
+		newV[N] = true
+		ans = max(ans, (time-1)*xs[N].rate+solve2(N, newV, time-1, player))
+	}
+	for _, e := range xs[N].valves {
+		//fmt.Println(e)
+		ans = max(ans, solve2(e.valve, V, time-1, player))
+	}
+
+	memo2[key] = ans
 	return ans
 }
 
