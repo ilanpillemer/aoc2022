@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	file, _ := os.ReadFile("INPUT")
+	file, _ := os.ReadFile("SAMPLE")
 	lines := strings.Fields(string(file))
 	//fmt.Println(lines)
 	values := []int{}
@@ -41,6 +41,7 @@ func main() {
 				next = next.Prev()
 				if next == e {
 					next = next.Prev()
+					j++
 				}
 				if next == nil {
 					next = r.Back()
@@ -55,6 +56,7 @@ func main() {
 				next = next.Next()
 				if next == e {
 					next = next.Next()
+					j++
 				}
 				if next == nil {
 					next = r.Front()
