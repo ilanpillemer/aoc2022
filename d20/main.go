@@ -39,6 +39,9 @@ func main() {
 			for j := 0; j < abs(v); j++ {
 
 				next = next.Prev()
+				if next == e {
+					next = next.Prev()
+				}
 				if next == nil {
 					next = r.Back()
 				}
@@ -50,7 +53,9 @@ func main() {
 			for j := 0; j < abs(v); j++ {
 
 				next = next.Next()
-
+				if next == e {
+					next = next.Next()
+				}
 				if next == nil {
 					next = r.Front()
 				}
