@@ -38,11 +38,14 @@ func main() {
 			next := e
 			for j := 0; j < abs(v); j++ {
 				next = next.Prev()
+				if next == e {
+					next = next.Prev()
+				}
 				if next == nil {
 					next = r.Back()
-				}
-				if next == e {
-					next.Prev()
+					if next == e {
+						next = next.Prev()
+					}
 				}
 			}
 			r.MoveBefore(e, next)
@@ -51,21 +54,25 @@ func main() {
 			next := e
 			for j := 0; j < abs(v); j++ {
 				next = next.Next()
+				if next == e {
+					next = next.Next()
+				}
 				if next == nil {
 					next = r.Front()
-				}
-				if next == e {
-					next.Next()
+					if next == e {
+						next = next.Next()
+					}
 				}
 			}
 			r.MoveAfter(e, next)
 
 		}
 		// Iterate through list and print its contents.
-		for e := r.Front(); e != nil; e = e.Next() {
-		//	fmt.Print(e.Value, ", ")
-		}
-	//	fmt.Println()
+//		for e := r.Front(); e != nil; e = e.Next() {
+//			fmt.Print(e.Value, ", ")
+//		}
+//		fmt.Println()
+
 	}
 
 	findZero := func() *list.Element {
