@@ -18,9 +18,12 @@ type Blue struct {
 	collection   [4]int
 }
 
+var part1 bool
+
 func main() {
+	//part1 = true
 	factories := map[int]Blue{}
-	file, _ := os.Open("SAMPLE")
+	file, _ := os.Open("INPUT2")
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
@@ -34,11 +37,34 @@ func main() {
 	for k, v := range factories {
 		fmt.Printf("%d -> %#v\n", k, v)
 	}
+	levels := map[int]int{}
+	if part1 {
+		for k, v := range factories {
+			fmt.Printf("Blueprint %d:\n", k)
+			v.robots[ORE] = 1
+			levels[k] = solve(v, 24)
+			fmt.Println(k, levels[k])
+		}
+		total := 0
+		for k, v := range levels {
+			total += (k * v)
+		}
+		fmt.Println("part1", total)
+		os.Exit(0)
+	}
+
 	for k, v := range factories {
 		fmt.Printf("Blueprint %d:\n", k)
 		v.robots[ORE] = 1
-		fmt.Println(k, solve(v, 24))
+		levels[k] = solve(v, 32)
+		fmt.Println(k, levels[k])
 	}
+	total := 1
+	for _, v := range levels {
+		total *= v
+	}
+	fmt.Println("part2", total)
+
 }
 
 const ORE = 0
@@ -74,6 +100,7 @@ type State struct {
 
 func solve(b Blue, time int) int {
 	best := 0
+	besttime := 0
 	S := map[State]bool{}
 	Q := []State{State{b, time}}
 	i := 0
@@ -82,8 +109,18 @@ func solve(b Blue, time int) int {
 		Q = Q[1:]
 		if best < next.b.collection[GEODE] {
 			best = next.b.collection[GEODE]
+			besttime = next.time
 			fmt.Printf("BEST %d: %#v\n", next.time, next)
 		}
+
+		if next.time >= besttime && next.b.collection[GEODE] < best {
+			continue
+		}
+
+		if next.time == 7 && next.b.collection[GEODE] == 0 {
+			continue
+		}
+
 		if next.time == 0 {
 			continue
 		}
@@ -93,25 +130,26 @@ func solve(b Blue, time int) int {
 		i++
 		S[next] = true
 		current := next.b
-			if i%10000000 == 0 {
-		fmt.Printf("%d: %#v\n", time-next.time+1, current)
-			}
+		if i%100000000 == 0 {
+			fmt.Printf("%d: %#v\n", time-next.time+1, current)
+		}
 
 		// dont build any robots
 		opt1 := acquire(current)
 
 		Q = append(Q, State{copyB(opt1), next.time - 1})
 
-		opt2 := buildOreRobot(opt1)
+		opt2 := buildOreRobot(current)
+
 		Q = append(Q, State{copyB(opt2), next.time - 1})
 
-		opt3 := buildClayRobot(opt1)
+		opt3 := buildClayRobot(current)
 		Q = append(Q, State{copyB(opt3), next.time - 1})
 
-		opt4 := buildObsRobot(opt1)
+		opt4 := buildObsRobot(current)
 		Q = append(Q, State{copyB(opt4), next.time - 1})
 
-		opt5 := buildGeodeRobot(opt1)
+		opt5 := buildGeodeRobot(current)
 		Q = append(Q, State{copyB(opt5), next.time - 1})
 
 	}
@@ -119,15 +157,19 @@ func solve(b Blue, time int) int {
 }
 
 func buildOreRobot(b Blue) Blue {
-
+	i := 0
 	newB := copyB(b)
-	if newB.robots[ORE] >= 4 {
-		return newB
+	if newB.robots[ORE] < 5 {
+		if newB.oreCost <= newB.collection[ORE] {
+			newB.collection[ORE] -= newB.oreCost
+			newB.robots[ORE]++
+			i = 1
+		}
 	}
-	if newB.oreCost <= newB.collection[ORE] {
-		newB.collection[ORE] -= newB.oreCost
-		newB.robots[ORE]++
-	}
+	newB.collection[ORE] += (newB.robots[ORE] - i)
+	newB.collection[CLAY] += newB.robots[CLAY]
+	newB.collection[OBSIDIAN] += newB.robots[OBSIDIAN]
+	newB.collection[GEODE] += newB.robots[GEODE]
 	return newB
 }
 
@@ -135,42 +177,61 @@ func buildOreRobot(b Blue) Blue {
 //var GEODE = 3
 
 func buildClayRobot(b Blue) Blue {
-
+	i := 0
 	newB := copyB(b)
-	if newB.robots[CLAY] >= 14 {
-		return newB
+	if newB.robots[CLAY] < 21 {
+		if newB.clayCost <= newB.collection[ORE] {
+			newB.collection[ORE] = newB.collection[ORE] - newB.clayCost
+			newB.robots[CLAY]++
+			i = 1
+		}
 	}
-	if newB.clayCost <= newB.collection[ORE] {
-		newB.collection[ORE] = newB.collection[ORE] - newB.clayCost + 1
-		newB.robots[CLAY]++
-	}
+	newB.collection[ORE] += (newB.robots[ORE])
+	newB.collection[CLAY] += (newB.robots[CLAY] - i)
+	newB.collection[OBSIDIAN] += newB.robots[OBSIDIAN]
+	newB.collection[GEODE] += newB.robots[GEODE]
 	return newB
 }
 
 func buildObsRobot(b Blue) Blue {
-
+	i := 0
+	limit := 13
+	if part1 {
+		limit = 21
+	}
 	newB := copyB(b)
-	if newB.robots[OBSIDIAN] >= 12 {
-		return newB
+	if newB.robots[OBSIDIAN] < limit {
+		if newB.obsidianCost[ORE] <= newB.collection[ORE] &&
+			newB.obsidianCost[OTHER] <= newB.collection[CLAY] {
+			newB.collection[ORE] -= newB.obsidianCost[0]
+			newB.collection[CLAY] -= newB.obsidianCost[1]
+			newB.robots[OBSIDIAN]++
+			i = 1
+		}
 	}
-	if newB.obsidianCost[ORE] <= newB.collection[ORE] &&
-		newB.obsidianCost[OTHER] <= newB.collection[CLAY] {
-		newB.collection[ORE] -= newB.obsidianCost[0]
-		newB.collection[CLAY] -= newB.obsidianCost[1]
-		newB.robots[OBSIDIAN]++
-	}
+	newB.collection[ORE] += (newB.robots[ORE])
+	newB.collection[CLAY] += (newB.robots[CLAY])
+	newB.collection[OBSIDIAN] += (newB.robots[OBSIDIAN] - i)
+	newB.collection[GEODE] += newB.robots[GEODE]
+
 	return newB
 }
 
 func buildGeodeRobot(b Blue) Blue {
-
+	i := 0
 	newB := copyB(b)
 	if newB.geodeCost[ORE] <= newB.collection[ORE] &&
 		newB.geodeCost[OTHER] <= newB.collection[OBSIDIAN] {
 		newB.collection[ORE] -= newB.geodeCost[0]
 		newB.collection[OBSIDIAN] -= newB.geodeCost[1]
 		newB.robots[GEODE]++
+		i = 1
 	}
+	newB.collection[ORE] += (newB.robots[ORE])
+	newB.collection[CLAY] += (newB.robots[CLAY])
+	newB.collection[OBSIDIAN] += (newB.robots[OBSIDIAN])
+	newB.collection[GEODE] += (newB.robots[GEODE] - i)
+
 	return newB
 }
 
