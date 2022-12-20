@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	file, _ := os.ReadFile("SAMPLE")
+	file, _ := os.ReadFile("INPUT")
 	lines := strings.Fields(string(file))
 	//fmt.Println(lines)
 	values := []int{}
@@ -37,11 +37,12 @@ func main() {
 		if v < 0 {
 			next := e
 			for j := 0; j < abs(v); j++ {
-
 				next = next.Prev()
-
 				if next == nil {
 					next = r.Back()
+				}
+				if next == e {
+					next.Prev()
 				}
 			}
 			r.MoveBefore(e, next)
@@ -49,17 +50,22 @@ func main() {
 		} else {
 			next := e
 			for j := 0; j < abs(v); j++ {
-
 				next = next.Next()
-
 				if next == nil {
 					next = r.Front()
+				}
+				if next == e {
+					next.Next()
 				}
 			}
 			r.MoveAfter(e, next)
 
 		}
-
+		// Iterate through list and print its contents.
+		for e := r.Front(); e != nil; e = e.Next() {
+		//	fmt.Print(e.Value, ", ")
+		}
+	//	fmt.Println()
 	}
 
 	findZero := func() *list.Element {
