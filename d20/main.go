@@ -8,15 +8,17 @@ import (
 	"strings"
 )
 
+// var key = int64(1)
+var key = int64(811589153)
+
 func main() {
 
 	file, _ := os.ReadFile("INPUT")
 	lines := strings.Fields(string(file))
-	//fmt.Println(lines)
-	values := []int{}
+	values := []int64{}
 	pointers := []*list.Element{}
 	for i := 0; i < len(lines); i++ {
-		values = append(values, atoi(lines[i]))
+		values = append(values, key*atoi(lines[i]))
 	}
 	r := list.New()
 
@@ -25,61 +27,52 @@ func main() {
 		pointers = append(pointers, e)
 	}
 
-	// Iterate through list and print its contents.
-	for e := r.Front(); e != nil; e = e.Next() {
-		//	fmt.Print(e.Value, ", ")
-	}
-	//fmt.Println()
-	for i := 0; i < len(lines); i++ {
-		v := pointers[i].Value.(int)
-		e := pointers[i]
-		//fmt.Printf("About to move %d %d spaces\n", v, v)
-		if v < 0 {
-			next := e
-			for j := 0; j < abs(v); j++ {
-				next = next.Prev()
-				if next == e {
+	reducer := int64(len(lines) - 1)
+	for k := 0; k < 10; k++ {
+		for i := 0; i < len(lines); i++ {
+			v := pointers[i].Value.(int64)
+			e := pointers[i]
+			if v < 0 {
+				next := e
+				for j := int64(0); j < abs(v)%reducer; j++ {
 					next = next.Prev()
-				}
-				if next == nil {
-					next = r.Back()
 					if next == e {
 						next = next.Prev()
 					}
+					if next == nil {
+						next = r.Back()
+						if next == e {
+							next = next.Prev()
+						}
+					}
 				}
-			}
-			r.MoveBefore(e, next)
+				r.MoveBefore(e, next)
 
-		} else {
-			next := e
-			for j := 0; j < abs(v); j++ {
-				next = next.Next()
-				if next == e {
+			} else {
+				next := e
+				for j := int64(0); j < abs(v)%reducer; j++ {
 					next = next.Next()
-				}
-				if next == nil {
-					next = r.Front()
 					if next == e {
 						next = next.Next()
 					}
+					if next == nil {
+						next = r.Front()
+						if next == e {
+							next = next.Next()
+						}
+					}
 				}
+				r.MoveAfter(e, next)
+
 			}
-			r.MoveAfter(e, next)
-
 		}
-		// Iterate through list and print its contents.
-//		for e := r.Front(); e != nil; e = e.Next() {
-//			fmt.Print(e.Value, ", ")
-//		}
-//		fmt.Println()
-
 	}
 
 	findZero := func() *list.Element {
 		//find zero
 		e := r.Front()
 		for {
-			if e.Value.(int) == 0 {
+			if e.Value.(int64) == 0 {
 				ret := e
 				return ret
 			}
@@ -87,7 +80,7 @@ func main() {
 		}
 	}
 
-	getFromZero := func(dist int) int {
+	getFromZero := func(dist int) int64 {
 		z := findZero()
 		for i := 0; i < dist; i++ {
 			//	fmt.Println(i)
@@ -96,7 +89,7 @@ func main() {
 				z = r.Front()
 			}
 		}
-		return z.Value.(int)
+		return z.Value.(int64)
 	}
 
 	a := getFromZero(1000)
@@ -106,15 +99,16 @@ func main() {
 	fmt.Println(a + b + c)
 }
 
-func atoi(str string) int {
-	c, err := strconv.Atoi(str)
+func atoi(str string) int64 {
+	c, err := strconv.ParseInt(str, 10, 64)
 	if err != nil {
 		panic(err)
 	}
 	return c
+
 }
 
-func abs(x int) int {
+func abs(x int64) int64 {
 	if x < 0 {
 		return -x
 	}
