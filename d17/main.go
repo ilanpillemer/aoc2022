@@ -14,44 +14,86 @@ var top = 1
 var x = 0
 var turn = 0
 var blow int
+var part1 bool
 
 func main() {
 	b, _ := os.ReadFile("INPUT")
 	moves := string(b)
 	modular := len(moves)
 	//	fmt.Println(moves)
-	t := 0
 	p := 0
 	flr := floor()
 	var a map[image.Point]bool
 
 	addChamber(flr)
+	//see https://github.com/mnml/aoc/blob/main/2022/17/1.go, I looked here for help/guidance for part 2
+	//though I still dont undertand his key, its disturbs my brain, as I cant understand it.
+
+	//the marker is:
+	// the jetstream
+	// the top row
+	cache := map[string][]int{}
+	var timeWarp bool
+	var toAdd int
 	for {
+		var nextmove byte
+		var key string
 		if stopped {
 			stopped = false
+
 			a = getPiece(p)
-			//	fmt.Println("got piece", a)
 			p++
+			key = fmt.Sprintf("%v%c", toprow(), moves[turn%modular])
+			if c, ok := cache[key]; ok {
+				d := top - c[1]
+				cycleTime := p - c[0]
+				remaining := 1000000000000 - p
+				totalCyclesWeCanAdd := remaining / cycleTime
+				if remaining%cycleTime == 0 {
+					fmt.Println(key, ok, p)
+					fmt.Println("woohoo")
+					toAdd = totalCyclesWeCanAdd * d
+					fmt.Println(top + toAdd)
+					os.Exit(0)
+				}
+			}
+
+			cache[key] = []int{p, top}
 		}
 
 		if blow%2 != 0 {
-			nextmove := moves[turn%modular]
+			nextmove = moves[turn%modular]
 			turn++
-			blow++
 			a = dropPiece(a, nextmove)
 		} else {
 			a = movedown(a)
-			blow++
 		}
-		if p == 2023 {
+		blow++
+		if p == 2023 && part1 {
 			fmt.Println("part1", top)
-			break
+		}
+		if timeWarp && p > 1000000000000 {
+			fmt.Println("final top is", top+toAdd)
+			os.Exit(0)
+		}
+	}
+
+}
+
+func toprow() string {
+	str := ""
+	for x := 0; x < 9; x++ {
+		for y := 0; y < 100; y++ {
+			if _, ok := chamber[Pt(x, top-y)]; ok {
+				str = fmt.Sprintf("%s%s", str, "#")
+			} else {
+				str = fmt.Sprintf("%s%s", str, " ")
+			}
 
 		}
-		t = t + 1
-		//	fmt.Println(p, top)
+		str = fmt.Sprintf("%s\n", str)
 	}
-	// fmt.Println(chamber)
+	return str
 }
 
 func addChamber(piece map[image.Point]bool) {
