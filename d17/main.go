@@ -23,7 +23,7 @@ func main() {
 	//	fmt.Println(moves)
 	p := 0
 	flr := floor()
-	var a map[image.Point]bool
+	var a map[Point]bool
 
 	addChamber(flr)
 	//see https://github.com/mnml/aoc/blob/main/2022/17/1.go, I looked here for help/guidance for part 2
@@ -34,34 +34,35 @@ func main() {
 	// the top row
 	cache := map[string][]int{}
 	var timeWarp bool
-	var toAdd int
+	var toAdd float64
 	for {
 		var nextmove byte
 		var key string
 		if stopped {
 			stopped = false
-
 			a = getPiece(p)
 			p++
 			key = fmt.Sprintf("%v%c", toprow(), moves[turn%modular])
 			if c, ok := cache[key]; ok {
-				d := top - c[1]
+				d := float64(top) - float64(c[1])
 				cycleTime := p - c[0]
-				remaining := 1000000000000 - p
-				totalCyclesWeCanAdd := remaining / cycleTime
+				remaining := 1000000000000 - p + 1
+				totalCyclesWeCanAdd := float64(remaining / cycleTime)
 				if remaining%cycleTime == 0 {
-					fmt.Println(key, ok, p)
-					fmt.Println("woohoo")
 					toAdd = totalCyclesWeCanAdd * d
-					fmt.Println(top + toAdd)
+					fmt.Println(int64(top) + int64(toAdd))
 					os.Exit(0)
 				}
+
 			}
 
 			cache[key] = []int{p, top}
 		}
 
 		if blow%2 != 0 {
+			key = fmt.Sprintf("%v%c", toprow(), moves[turn%modular])
+			cache[key] = []int{p, top}
+
 			nextmove = moves[turn%modular]
 			turn++
 			a = dropPiece(a, nextmove)
@@ -70,10 +71,10 @@ func main() {
 		}
 		blow++
 		if p == 2023 && part1 {
-			fmt.Println("part1", top)
+			fmt.Println("part1", top, top/p, 2023*top/p)
 		}
 		if timeWarp && p > 1000000000000 {
-			fmt.Println("final top is", top+toAdd)
+			fmt.Println("final top is", float64(top)+toAdd)
 			os.Exit(0)
 		}
 	}
@@ -83,7 +84,7 @@ func main() {
 func toprow() string {
 	str := ""
 	for x := 0; x < 9; x++ {
-		for y := 0; y < 100; y++ {
+		for y := 0; y < 40; y++ {
 			if _, ok := chamber[Pt(x, top-y)]; ok {
 				str = fmt.Sprintf("%s%s", str, "#")
 			} else {
@@ -96,7 +97,7 @@ func toprow() string {
 	return str
 }
 
-func addChamber(piece map[image.Point]bool) {
+func addChamber(piece map[Point]bool) {
 	for k := range piece {
 		chamber[k] = true
 	}
