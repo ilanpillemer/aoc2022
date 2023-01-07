@@ -17,6 +17,8 @@ type tile struct {
 	left     *tile
 	right    *tile
 	side     int
+	xoffset  int
+	yoffset  int
 }
 
 const (
@@ -31,18 +33,174 @@ func main() {
 	part2()
 }
 
+func wrap(side int, xy image.Point, direction int) image.Point {
+	z := side*10 + direction
+	switch z {
+	case 13: // side 1 to side 6
+		vx, vy := offsets(6)
+		wx, _ := offsets(1)
+		x := vx
+		y := vy + (xy.X - wx)
+		return image.Pt(x, y)
+	case 23: // side 2 to 6
+		vx, vy := offsets(6)
+		wx, _ := offsets(2)
+		y := vy + 49
+		x := xy.X - wx + vx
+		return image.Pt(x, y)
+	case 43: //side 4 to side 3
+		vx, vy := offsets(3)
+		wx, _ := offsets(4)
+		x := vx
+		y := vy + (xy.X - wx)
+		return image.Pt(x, y)
+	case 61: // side 6 to side 2
+		vx, vy := offsets(2)
+		wx, _ := offsets(6)
+		y := vy + 49
+		x := xy.X - wx + vx
+		return image.Pt(x, y)
+	case 21: // side 2 to side 3
+		vx, vy := offsets(3)
+		wx, _ := offsets(2)
+		x := vy + 49
+		y := vx + (xy.X - wx)
+		return image.Pt(x, y)
+	case 51: // side 5 to side 6
+		vx, vy := offsets(6)
+		wx, _ := offsets(5)
+		x := vx + 49
+		y := vy + (xy.X - wx)
+		return image.Pt(x, y)
+	case 62:
+		vx, vy := offsets(1)
+		_, wy := offsets(6)
+		x := vx + (xy.Y - wy)
+		y := vy
+		return image.Pt(x, y)
+	case 12: //side 1 -> side 4
+		vx, vy := offsets(4)
+		_, wy := offsets(1)
+		x := vx
+		y := vy + (49 - (xy.Y - wy))
+		return image.Pt(x, y)
+	case 32: //side 3 -> side 4
+		vx, vy := offsets(4)
+		_, wy := offsets(3)
+		x := vx + (xy.Y - wy)
+		y := vy
+		return image.Pt(x, y)
+	case 42: // side 4->side1
+		vx, vy := offsets(1)
+		_, wy := offsets(4)
+		//	x := vx + (49 - (xy.Y - wy))
+		x := vx
+		y := vy + (49 - (xy.Y - wy))
+		return image.Pt(x, y)
+	case 20:
+		vx, vy := offsets(5)
+		_, wy := offsets(2)
+		//	x := vx + (49 - (xy.Y - wy))
+		x := vx + 49
+		y := vy + (49 - (xy.Y - wy))
+		return image.Pt(x, y)
+	case 30:
+		vx, vy := offsets(2)
+		wx, _ := offsets(3)
+		x := vx + (xy.X - wx)
+		y := vy + 49
+		return image.Pt(x, y)
+	case 60:
+		vx, vy := offsets(5)
+		_, wy := offsets(6)
+
+		x := vx + (xy.Y - wy)
+		y := vy + 49
+		return image.Pt(x, y)
+	case 50:
+		vx, vy := offsets(2)
+		_, wy := offsets(5)
+		//	x := vx + (49 - (xy.Y - wy))
+		x := vx + 49
+		y := vy + (49 - (xy.Y - wy))
+		return image.Pt(x, y)
+	default:
+		panic(fmt.Sprintf("missing wrap %d", z))
+	}
+
+	return image.Pt(0, 0)
+}
+
+func offsets(side int) (int, int) {
+	switch side {
+	case 1:
+		return 50, 0
+	case 2:
+		return 100, 0
+	case 3:
+		return 50, 50
+	case 4:
+		return 0, 100
+	case 5:
+		return 50, 100
+	case 6:
+		return 0, 150
+	default:
+		panic("illegal side")
+	}
+	return 0, 0
+}
+
+var xs = map[int]int{
+26: UP,
+	12: RIGHT,
+	21: LEFT,
+	16: RIGHT,
+	62: DOWN,
+	23: LEFT,
+	31: UP,
+	64: UP,
+	41: RIGHT,
+	14: RIGHT,
+	46: DOWN,
+	32: UP,
+	25: LEFT,
+	53: UP,
+	13: DOWN,
+	35: DOWN,
+	34: DOWN,
+	65: UP,
+	56: LEFT,
+	45: RIGHT,
+	54: LEFT,
+	61: DOWN,
+	43: RIGHT,
+	52: LEFT,
+}
+
+func newfacing(f, from, to int) int {
+	if from == to {
+		return f
+	}
+	f, ok := xs[from*10+to]
+	if !ok {
+		panic(fmt.Sprintf("%d::%d -> %d", from*10+to, from, to))
+	}
+	return f
+}
 func part2() {
 	maxx := 0
 	maxy := 0
 	facing := 0 // facing to the right
 	tiles := map[image.Point]*tile{}
 	fmt.Println("d22")
-	b, _ := os.ReadFile("SAMPLE")
+	b, _ := os.ReadFile("INPUT")
 	xs := strings.Split(string(b), "\n\n")
 	board, path := xs[0], xs[1]
 	grid := strings.Split(board, "\n")
-	fmt.Println(board)
-	fmt.Println(path)
+	//fmt.Println(path)
+	//fmt.Println(board)
+
 	path = path + "$"
 	//parse to get all tiles
 
@@ -64,31 +222,49 @@ func part2() {
 	//top
 	// this will be where y is 0
 	fmt.Println("SIDE1")
-	//sample rules rules
 	for _, v := range tiles {
-		if v.position.Y >= 0 && v.position.Y < 4 {
-			v.side = 1
-			tiles[v.position] = v
-			continue
+		row, col := 0, 0
+		x, y := v.position.X, v.position.Y
+		if x < 50 {
+			col = 1
+		} else if x >= 50 && x < 100 {
+			col = 2
+		} else if x >= 100 && x < 150 {
+			col = 3
+		} else {
+			panic("invalid x " + fmt.Sprintf("%d", x))
 		}
-		if v.position.Y >= 8 && v.position.Y < 12 {
-			v.side = 5
-			if v.position.X >= 12 {
-				v.side = 6
-			}
-			tiles[v.position] = v
-			continue
+		if y < 50 {
+			row = 10
+		} else if y >= 50 && y < 100 {
+			row = 20
+		} else if y >= 100 && y < 150 {
+			row = 30
+		} else if y >= 150 && y < 200 {
+			row = 40
+		} else {
+			panic("invalid y")
 		}
-		switch {
-		case v.position.X >= 4 && v.position.X < 8:
-			v.side = 3
-		case v.position.X >= 8:
-			v.side = 4
+		side := 0
+		switch row + col {
+		case 12:
+			side = 1
+		case 13:
+			side = 2
+		case 22:
+			side = 3
+		case 31:
+			side = 4
+		case 32:
+			side = 5
+		case 41:
+			side = 6
 		default:
-			v.side = 2
+			panic("unknown side: " + fmt.Sprintf("%d", row+col))
 		}
+		v.side = side
+		v.xoffset, v.yoffset = offsets(side)
 		tiles[v.position] = v
-		continue
 	}
 
 	//parse to link tiles
@@ -98,11 +274,19 @@ func part2() {
 		left := v.position.X - 1
 		for {
 			if left < 0 {
+				//	fmt.Print(v.side, v.position, LEFT, "->")
+				pos := wrap(v.side, v.position, LEFT)
+				//	fmt.Println(pos)
+				leftTile, ok := tiles[pos]
+				if !ok {
+					panic("messed up wrap left")
+				}
+				v.left = leftTile
+				tiles[k] = v
 				break
 			}
 			if leftTile, ok := tiles[image.Pt(left, v.position.Y)]; ok &&
-				left != v.position.X &&
-				leftTile.side == v.side {
+				left != v.position.X {
 				v.left = leftTile
 				tiles[k] = v
 				break
@@ -112,10 +296,18 @@ func part2() {
 		right := v.position.X + 1
 		for {
 			if right > maxx {
+				fmt.Print(v.side, v.position, RIGHT, "->")
+				pos := wrap(v.side, v.position, RIGHT)
+				fmt.Println(pos)
+				rightTile, ok := tiles[pos]
+				if !ok {
+					panic("messed up wrap right")
+				}
+				v.right = rightTile
+				tiles[k] = v
 				break
 			}
-			if rightTile, ok := tiles[image.Pt(right, v.position.Y)]; ok && right != v.position.X &&
-				rightTile.side == v.side {
+			if rightTile, ok := tiles[image.Pt(right, v.position.Y)]; ok && right != v.position.X {
 				v.right = rightTile
 				tiles[k] = v
 				break
@@ -126,10 +318,18 @@ func part2() {
 		up := v.position.Y - 1
 		for {
 			if up < 0 {
+				//	fmt.Print(v.side, v.position, UP, "->")
+				pos := wrap(v.side, v.position, UP)
+				//	fmt.Println(pos)
+				upTile, ok := tiles[pos]
+				if !ok {
+					panic("messed up wrap up")
+				}
+				v.up = upTile
+				tiles[k] = v
 				break
 			}
-			if upTile, ok := tiles[image.Pt(v.position.X, up)]; ok && up != v.position.Y &&
-				upTile.side == v.side {
+			if upTile, ok := tiles[image.Pt(v.position.X, up)]; ok && up != v.position.Y {
 				v.up = upTile
 				tiles[k] = v
 				break
@@ -139,10 +339,18 @@ func part2() {
 		down := v.position.Y + 1
 		for {
 			if down > maxy {
+				//	fmt.Print(v.side, v.position, DOWN, "->")
+				pos := wrap(v.side, v.position, DOWN)
+				//	fmt.Println(pos)
+				downTile, ok := tiles[pos]
+				if !ok {
+					panic("messed up wrap down")
+				}
+				v.down = downTile
+				tiles[k] = v
 				break
 			}
-			if downTile, ok := tiles[image.Pt(v.position.X, down)]; ok && down != v.position.Y &&
-				downTile.side == v.side {
+			if downTile, ok := tiles[image.Pt(v.position.X, down)]; ok && down != v.position.Y {
 				v.down = downTile
 				tiles[k] = v
 				break
@@ -178,86 +386,37 @@ func part2() {
 			return
 		}
 		fmt.Printf("facing %d, position side %d %v\n", facing, current.position, current.side)
-		newfacing := facing
 		switch facing {
 		case 0:
-			if current.right == nil {
-				switch current.side {
-				case 4:
-					current.right = tiles[image.Pt(current.position.X+3, current.position.Y+3)]
-					newfacing = DOWN
-				case 2:
-					current.right = tiles[image.Pt(current.position.X+1, current.position.Y)]
-					newfacing = RIGHT
-				default:
-					panic("oops")
-				}
-			}
 			if current.right.value != '#' {
-				if current.side != current.down.side {
-					fmt.Printf("side [%d] -> side [%d]\n", current.side, current.down.side)
+				if current.side != current.right.side {
+					fmt.Printf("side [%d] -> side [%d]\n", current.side, current.right.side)
 
 				}
-				facing = newfacing
+				facing = newfacing(facing, current.side, current.right.side)
 				current = current.right
 			}
-
 			move(count - 1)
 		case 1:
-			if current.down == nil {
-				switch current.side {
-				case 1:
-					current.down = tiles[image.Pt(current.position.X, current.position.Y+1)]
-					newfacing = DOWN
-				case 5:
-					current.down = tiles[image.Pt(current.position.X-9, current.position.Y-4)]
-					newfacing = UP
-				default:
-					panic("oops")
-				}
-			}
 			if current.down.value != '#' {
 				if current.side != current.down.side {
 					fmt.Printf("side [%d] -> side [%d]\n", current.side, current.down.side)
 				}
-				facing = newfacing
+				facing = newfacing(facing, current.side, current.down.side)
 				current = current.down
 			}
-
 			move(count - 1)
 		case 2:
-			if current.left == nil {
-				switch current.side {
-				case 6:
-					current.left = tiles[image.Pt(current.position.X-1, current.position.Y)]
-					newfacing = LEFT
-				default:
-					panic("oops")
-				}
-			}
 			if current.left.value != '#' {
-
+				facing = newfacing(facing, current.side, current.left.side)
 				current = current.left
 			}
-
 			move(count - 1)
 		case 3:
-			if current.up == nil {
-				switch current.side {
-				case 3:
-					fmt.Println(image.Pt(current.position.X+8, current.position.Y+4))
-					current.up = tiles[image.Pt(current.position.X+8, current.position.Y+7)]
-					newfacing = UP
-				default:
-					panic("oops")
-				}
-			}
 			if current.up.value != '#' {
-				facing = newfacing
+				facing = newfacing(facing, current.side, current.up.side)
 				current = current.up
 			}
-			facing = newfacing
-
 			move(count - 1)
 		default:
 			panic("oops")
