@@ -10,6 +10,7 @@ import (
 )
 
 var grid = map[Point]bool{}
+var part2 bool
 
 func main() {
 	file, err := os.Open("INPUT")
@@ -27,15 +28,26 @@ func main() {
 		y++
 
 	}
-	display(grid)
-	fmt.Println()
+
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
 	state := dcopy(grid)
+
+	//part 1
+	fmt.Println("part1")
 	for i := 0; i < 10; i++ {
 		state = step(state, i)
 	}
+	display(state)
+	fmt.Println("part 2")
+	//part 2
+	state = dcopy(grid)
+	part2 = true
+	for i := 0; i >= 0; i++ {
+		state = step(state, i)
+	}
+
 	display(state)
 }
 
@@ -57,6 +69,7 @@ func dcopy(xs map[Point]bool) map[Point]bool {
 }
 
 func step(xs map[Point]bool, count int) map[Point]bool {
+	fixed := true
 	next := dcopy(xs)
 	dirs := [4]func(Point) []Point{north, south, west, east}
 	change := [4]Point{Pt(0, -1), Pt(0, 1), Pt(-1, 0), Pt(1, 0)}
@@ -66,41 +79,37 @@ func step(xs map[Point]bool, count int) map[Point]bool {
 	for elf := range xs {
 		surr := surrounding(elf)
 		// only propose if an elf exists in your surround
-		//	fmt.Println("surr", surr)
-		//	fmt.Println(offset)
 		if exists(xs, surr) {
 			for i := 0; i < 4; i++ {
 				index := (offset + i) % 4
-				//	fmt.Print(index)
 				if !exists(xs, dirs[index](elf)) {
 					proposed[elf.Add(change[index])]++
 					proposer[elf.Add(change[index])] = elf
-					//	fmt.Println()
 					break
 				}
 			}
 		}
 	}
-	//	fmt.Println("--PROPOSED--")
-	//	fmt.Println(proposed)
-	//	fmt.Println()
 
 	toAdd := []Point{}
 	toDelete := []Point{}
 	for proposal, j := range proposed {
 		if j == 1 {
-			//fmt.Println("switching", proposal, proposer[proposal])
+			fixed = false
 			toAdd = append(toAdd, proposal)
 			toDelete = append(toDelete, proposer[proposal])
 		}
 	}
 	for _, e := range toDelete {
-		//	fmt.Println("deleting")
 		delete(next, e)
 	}
 	for _, e := range toAdd {
 		_ = e
 		next[e] = true
+	}
+	if fixed && part2 {
+		fmt.Println("elves have stopped moving at", count+1)
+		os.Exit(1)
 	}
 
 	return next
