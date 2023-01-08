@@ -33,6 +33,16 @@ func main() {
 	part2()
 }
 
+func printme(side int, posfrom image.Point, dir int, posto image.Point, tiles map[image.Point]*tile) {
+	tile := tiles[posfrom]
+	if posfrom.X == tile.xoffset || posfrom.X == tile.xoffset+49 {
+		if posfrom.Y == tile.yoffset || posfrom.Y == tile.yoffset+49 {
+			//	fmt.Println(side, posfrom, dir, "-->", posto)
+		}
+	}
+
+}
+
 func wrap(side int, xy image.Point, direction int) image.Point {
 	z := side*10 + direction
 	switch z {
@@ -57,7 +67,7 @@ func wrap(side int, xy image.Point, direction int) image.Point {
 	case 61: // side 6 to side 2
 		vx, vy := offsets(2)
 		wx, _ := offsets(6)
-		y := vy + 49
+		y := vy
 		x := xy.X - wx + vx
 		return image.Pt(x, y)
 	case 21: // side 2 to side 3
@@ -106,8 +116,9 @@ func wrap(side int, xy image.Point, direction int) image.Point {
 		return image.Pt(x, y)
 	case 30:
 		vx, vy := offsets(2)
-		wx, _ := offsets(3)
-		x := vx + (xy.X - wx)
+		_, wy := offsets(3)
+
+		x := vx + (xy.Y - wy)
 		y := vy + 49
 		return image.Pt(x, y)
 	case 60:
@@ -152,7 +163,7 @@ func offsets(side int) (int, int) {
 }
 
 var xs = map[int]int{
-26: UP,
+	26: UP,
 	12: RIGHT,
 	21: LEFT,
 	16: RIGHT,
@@ -221,7 +232,6 @@ func part2() {
 	// add wrapping links
 	//top
 	// this will be where y is 0
-	fmt.Println("SIDE1")
 	for _, v := range tiles {
 		row, col := 0, 0
 		x, y := v.position.X, v.position.Y
@@ -274,9 +284,9 @@ func part2() {
 		left := v.position.X - 1
 		for {
 			if left < 0 {
-				//	fmt.Print(v.side, v.position, LEFT, "->")
+
 				pos := wrap(v.side, v.position, LEFT)
-				//	fmt.Println(pos)
+				printme(v.side, v.position, LEFT, pos, tiles)
 				leftTile, ok := tiles[pos]
 				if !ok {
 					panic("messed up wrap left")
@@ -296,9 +306,9 @@ func part2() {
 		right := v.position.X + 1
 		for {
 			if right > maxx {
-				fmt.Print(v.side, v.position, RIGHT, "->")
+
 				pos := wrap(v.side, v.position, RIGHT)
-				fmt.Println(pos)
+				printme(v.side, v.position, RIGHT, pos, tiles)
 				rightTile, ok := tiles[pos]
 				if !ok {
 					panic("messed up wrap right")
@@ -318,9 +328,9 @@ func part2() {
 		up := v.position.Y - 1
 		for {
 			if up < 0 {
-				//	fmt.Print(v.side, v.position, UP, "->")
+
 				pos := wrap(v.side, v.position, UP)
-				//	fmt.Println(pos)
+				printme(v.side, v.position, UP, pos, tiles)
 				upTile, ok := tiles[pos]
 				if !ok {
 					panic("messed up wrap up")
@@ -339,9 +349,9 @@ func part2() {
 		down := v.position.Y + 1
 		for {
 			if down > maxy {
-				//	fmt.Print(v.side, v.position, DOWN, "->")
+
 				pos := wrap(v.side, v.position, DOWN)
-				//	fmt.Println(pos)
+				printme(v.side, v.position, DOWN, pos, tiles)
 				downTile, ok := tiles[pos]
 				if !ok {
 					panic("messed up wrap down")
@@ -385,12 +395,12 @@ func part2() {
 		if count == 0 {
 			return
 		}
-		fmt.Printf("facing %d, position side %d %v\n", facing, current.position, current.side)
+		//	fmt.Printf("facing %d, position side %d %v\n", facing, current.position, current.side)
 		switch facing {
 		case 0:
 			if current.right.value != '#' {
 				if current.side != current.right.side {
-					fmt.Printf("side [%d] -> side [%d]\n", current.side, current.right.side)
+					//fmt.Printf("side [%d] -> side [%d]\n", current.side, current.right.side)
 
 				}
 				facing = newfacing(facing, current.side, current.right.side)
@@ -400,7 +410,7 @@ func part2() {
 		case 1:
 			if current.down.value != '#' {
 				if current.side != current.down.side {
-					fmt.Printf("side [%d] -> side [%d]\n", current.side, current.down.side)
+					//	fmt.Printf("side [%d] -> side [%d]\n", current.side, current.down.side)
 				}
 				facing = newfacing(facing, current.side, current.down.side)
 				current = current.down
@@ -436,7 +446,7 @@ func part2() {
 					num = num + string(path[p])
 					p++
 				} else {
-					println(num)
+					//	println(num)
 					move(atoi(num))
 					break
 				}
@@ -471,7 +481,7 @@ func part2() {
 			default:
 				panic("oops")
 			}
-			fmt.Printf("%c\n", path[p])
+			//	fmt.Printf("%c\n", path[p])
 			p++
 		}
 
