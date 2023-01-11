@@ -23,7 +23,7 @@ func main() {
 	right := board{}
 	empty := board{}
 	fmt.Println("d22")
-	b, _ := os.ReadFile("SAMPLE")
+	b, _ := os.ReadFile("INPUT")
 	grid := strings.Split(string(b), "\n")
 	//parse to get all tiles
 	for i, t := range grid {
@@ -61,12 +61,82 @@ func main() {
 		state = next(state)
 	}
 
-//	for i := 0; i < len(lookup); i++ {
-//		fmt.Println(i)
-//		display(lookup[i][4])
-//	}
+	//	for i := 0; i < len(lookup); i++ {
+	//		fmt.Println(i)
+	//		display(lookup[i][4])
+	//	}
+
+	score := solve(acc{Pt(1, 0), 0})
+	seen[fmt.Sprintf("%v%v", Pt(1, 0), empty)] = true
+	fmt.Println("SCORE", score+1)
+}
+
+var seen = map[string]bool{}
+var seen2 = map[string]bool{}
+
+type acc struct {
+	P Point
+	S int
+}
+
+var exit = Pt(maxx-1, maxy)
+var maxminute = -1
+
+func solve(x acc) int {
+	Q := []acc{x}
+	for {
+		p := Q[0]
+//		if p.S > maxminute {
+//			fmt.Println(p.S, p.P)
+//			maxminute = p.S
+//		}
 
 
+		Q = Q[1:]
+		if p.P == Pt(maxx-1, maxy) {
+			return p.S
+		}
+		xs := moves(acc{p.P, p.S + 1})
+		Q = append(Q, xs...)
+	}
+
+}
+
+func moves(ac acc) []acc {
+	z := ac.S % (maxx * maxy)
+	empty := lookup[z][4]
+
+	x := ac.P
+	xs := []acc{}
+	key := fmt.Sprintf("%v%v", x, empty)
+	key2 := fmt.Sprintf("%v%v", x, ac.S)
+	if !seen[key] && !seen2[key2] {
+		xs = append(xs, acc{x, ac.S})
+		seen[key] = true
+		seen2[key2] = true
+	}
+	a := x.Add(Pt(1, 0))
+	b := x.Add(Pt(-1, 0))
+	c := x.Add(Pt(0, 1))
+	d := x.Add(Pt(0, -1))
+	options := []Point{a, b, c, d}
+	if a == exit || b == exit || c == exit || d == exit {
+		fmt.Println(ac.S, "!!!!", a)
+	}
+
+	for _, y := range options {
+		if _, ok := empty[y]; ok {
+			key := fmt.Sprintf("%v%v", y, empty)
+			key2 := fmt.Sprintf("%v%v", y, ac.S)
+			if !seen[key] && !seen2[key2] {
+				xs = append(xs, acc{y, ac.S})
+			}
+			seen[key] = true
+			seen2[key2] = true
+		}
+	}
+
+	return xs
 }
 
 func next(b [5]board) [5]board {
