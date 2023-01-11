@@ -55,20 +55,7 @@ func main() {
 	//parse to link tiles
 	fmt.Println(maxx, maxy)
 	display(tiles)
-	//state := [5]board{up, down, left, right, empty}
 	lookup[0] = [5]board{up, down, left, right, empty}
-	//	for i := 0; i < (maxx*maxy)+2; i++ {
-	//		lookup[i] = state
-	//		state = next(state)
-	//	}
-
-	//	for i := 0; i < 10; i++ {
-	//		fmt.Println(i)
-	//		//display(getLookup(i)[3])
-	//		//		display(lookup[i][4])
-	//		//		display(lookup[i][4])
-	//		//	display(lookup[i][4])
-	//	}
 	fmt.Println(maxx, maxy)
 	exit = Pt(maxx-1, maxy)
 	score := solve(acc{Pt(1, 0), 0})
@@ -78,6 +65,7 @@ func main() {
 
 var seen = map[string]bool{}
 var seen2 = map[string]bool{}
+var part1 = false
 
 func getLookup(t int) [5]board {
 	if l, ok := lookup[t]; ok {
@@ -96,22 +84,37 @@ type acc struct {
 }
 
 var exit = Pt(maxx-1, maxy)
+var count = 0
 var maxminute = -1
 
 func solve(x acc) int {
 	Q := []acc{x}
 	for {
 		p := Q[0]
-		//		if p.S > maxminute {
-		//			fmt.Println(p.S, p.P)
-		//			maxminute = p.S
-		//		}
-
 		Q = Q[1:]
-		if p.P == exit {
+		if p.P == exit && part1 {
 			fmt.Println("found", p.P, p.S)
 			return p.S
 		}
+		if p.P == exit && count == 2 {
+			fmt.Println("found", p.P, p.S)
+			return p.S
+		} else if p.P == exit && count == 0 {
+			exit = Pt(1, 0)
+			count++
+			fmt.Println("one", p.P, p.S)
+			seen = map[string]bool{}
+			seen2 = map[string]bool{}
+			Q = []acc{}
+		} else if p.P == exit && count == 1 {
+			exit = Pt(maxx-1, maxy)
+			count++
+			fmt.Println("two", p.P, p.S)
+			seen = map[string]bool{}
+			seen2 = map[string]bool{}
+			Q = []acc{}
+		}
+
 		xs := moves(acc{p.P, p.S + 1})
 		Q = append(Q, xs...)
 	}
@@ -119,7 +122,6 @@ func solve(x acc) int {
 }
 
 func moves(ac acc) []acc {
-	//	z := ac.S % ((maxx * maxy) + 1)
 	empty := getLookup(ac.S)[4]
 
 	x := ac.P
