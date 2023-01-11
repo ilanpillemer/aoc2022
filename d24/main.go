@@ -55,24 +55,40 @@ func main() {
 	//parse to link tiles
 	fmt.Println(maxx, maxy)
 	display(tiles)
-	state := [5]board{up, down, left, right, empty}
-	for i := 0; i < (maxx*maxy)+1; i++ {
-		lookup[i] = state
-		state = next(state)
-	}
-
-	//	for i := 0; i < len(lookup); i++ {
-	//		fmt.Println(i)
-	//		display(lookup[i][4])
+	//state := [5]board{up, down, left, right, empty}
+	lookup[0] = [5]board{up, down, left, right, empty}
+	//	for i := 0; i < (maxx*maxy)+2; i++ {
+	//		lookup[i] = state
+	//		state = next(state)
 	//	}
 
+	//	for i := 0; i < 10; i++ {
+	//		fmt.Println(i)
+	//		//display(getLookup(i)[3])
+	//		//		display(lookup[i][4])
+	//		//		display(lookup[i][4])
+	//		//	display(lookup[i][4])
+	//	}
+	fmt.Println(maxx, maxy)
+	exit = Pt(maxx-1, maxy)
 	score := solve(acc{Pt(1, 0), 0})
 	seen[fmt.Sprintf("%v%v", Pt(1, 0), empty)] = true
-	fmt.Println("SCORE", score+1)
+	fmt.Println("SCORE", score)
 }
 
 var seen = map[string]bool{}
 var seen2 = map[string]bool{}
+
+func getLookup(t int) [5]board {
+	if l, ok := lookup[t]; ok {
+		return l
+	}
+
+	state := next(lookup[t-1])
+	lookup[t] = state
+	return lookup[t]
+
+}
 
 type acc struct {
 	P Point
@@ -86,14 +102,14 @@ func solve(x acc) int {
 	Q := []acc{x}
 	for {
 		p := Q[0]
-//		if p.S > maxminute {
-//			fmt.Println(p.S, p.P)
-//			maxminute = p.S
-//		}
-
+		//		if p.S > maxminute {
+		//			fmt.Println(p.S, p.P)
+		//			maxminute = p.S
+		//		}
 
 		Q = Q[1:]
-		if p.P == Pt(maxx-1, maxy) {
+		if p.P == exit {
+			fmt.Println("found", p.P, p.S)
 			return p.S
 		}
 		xs := moves(acc{p.P, p.S + 1})
@@ -103,27 +119,22 @@ func solve(x acc) int {
 }
 
 func moves(ac acc) []acc {
-	z := ac.S % (maxx * maxy)
-	empty := lookup[z][4]
+	//	z := ac.S % ((maxx * maxy) + 1)
+	empty := getLookup(ac.S)[4]
 
 	x := ac.P
 	xs := []acc{}
-	key := fmt.Sprintf("%v%v", x, empty)
-	key2 := fmt.Sprintf("%v%v", x, ac.S)
-	if !seen[key] && !seen2[key2] {
-		xs = append(xs, acc{x, ac.S})
-		seen[key] = true
-		seen2[key2] = true
-	}
 	a := x.Add(Pt(1, 0))
 	b := x.Add(Pt(-1, 0))
 	c := x.Add(Pt(0, 1))
 	d := x.Add(Pt(0, -1))
-	options := []Point{a, b, c, d}
-	if a == exit || b == exit || c == exit || d == exit {
-		fmt.Println(ac.S, "!!!!", a)
+	e := x
+	options := []Point{a, b, c, d, e}
+	for _, y := range options {
+		if y == exit {
+			fmt.Println(ac.S, "!!!!", y)
+		}
 	}
-
 	for _, y := range options {
 		if _, ok := empty[y]; ok {
 			key := fmt.Sprintf("%v%v", y, empty)
